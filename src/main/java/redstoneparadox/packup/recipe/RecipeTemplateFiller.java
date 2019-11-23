@@ -1,7 +1,6 @@
 package redstoneparadox.packup.recipe;
 
 import com.google.gson.*;
-import net.minecraft.recipe.Ingredient;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Pair;
 
@@ -12,32 +11,17 @@ import java.util.Map;
 public class RecipeTemplateFiller {
 
     public static List<Pair<Identifier, JsonObject>> fillShapedTemplate(Identifier id, JsonObject original) {
-        JsonArray templateArray = original.getAsJsonArray("replacements");
-        List<Template> templates = new ArrayList<>();
+        List<List<Pair<String, String>>> replacements = getReplacements(original.getAsJsonArray("replacements"));
         List<Pair<Identifier, JsonObject>> filledRecipes = new ArrayList<>();
 
-        for (JsonElement element: templateArray) {
-            if (element.isJsonObject()) {
-                JsonObject obj = element.getAsJsonObject();
-                List<Pair<String, String>> pairs = new ArrayList<>();
-                for (Map.Entry<String, JsonElement> entry: obj.entrySet()) {
-                    if (entry.getValue().isJsonPrimitive()) {
-                        Pair<String, String> pair = new Pair<>(entry.getKey(), entry.getValue().getAsString());
-                        pairs.add(pair);
-                    }
-                }
-                templates.add(new Template(pairs));
-            }
-        }
-
-        for (Template template: templates) {
+        for (List<Pair<String, String>> replacement: replacements) {
             JsonObject copy = new JsonObject();
             copy.add("type", new JsonPrimitive("minecraft:crafting_shaped"));
             copy.add("pattern", original.get("pattern"));
-            copy.add("key", fillKeyTemplate(original.getAsJsonObject("key"), template));
-            copy.add("result", fillResultTemplate(original.getAsJsonObject("result"), template));
+            copy.add("key", fillKeyTemplate(original.getAsJsonObject("key"), replacement));
+            copy.add("result", fillResultTemplate(original.getAsJsonObject("result"), replacement));
 
-            Identifier identifier = new Identifier(id.getNamespace(), replace(original.get("id").getAsString(), template));
+            Identifier identifier = new Identifier(id.getNamespace(), replace(original.get("id").getAsString(), replacement));
 
             filledRecipes.add(new Pair<>(identifier, copy));
         }
@@ -46,31 +30,16 @@ public class RecipeTemplateFiller {
     }
 
     public static List<Pair<Identifier, JsonObject>> fillShapelessTemplate(Identifier id, JsonObject original) {
-        JsonArray templateArray = original.getAsJsonArray("replacements");
-        List<Template> templates = new ArrayList<>();
+        List<List<Pair<String, String>>> replacements = getReplacements(original.getAsJsonArray("replacements"));
         List<Pair<Identifier, JsonObject>> filledRecipes = new ArrayList<>();
 
-        for (JsonElement element: templateArray) {
-            if (element.isJsonObject()) {
-                JsonObject obj = element.getAsJsonObject();
-                List<Pair<String, String>> pairs = new ArrayList<>();
-                for (Map.Entry<String, JsonElement> entry: obj.entrySet()) {
-                    if (entry.getValue().isJsonPrimitive()) {
-                        Pair<String, String> pair = new Pair<>(entry.getKey(), entry.getValue().getAsString());
-                        pairs.add(pair);
-                    }
-                }
-                templates.add(new Template(pairs));
-            }
-        }
-
-        for (Template template: templates) {
+        for (List<Pair<String, String>> replacement: replacements) {
             JsonObject copy = new JsonObject();
             copy.add("type", new JsonPrimitive("minecraft:crafting_shapeless"));
-            copy.add("ingredients", fillIngredientsTemplate(original.getAsJsonArray("ingredients"), template));
-            copy.add("result", fillResultTemplate(original.getAsJsonObject("result"), template));
+            copy.add("ingredients", fillIngredientsTemplate(original.getAsJsonArray("ingredients"), replacement));
+            copy.add("result", fillResultTemplate(original.getAsJsonObject("result"), replacement));
 
-            Identifier identifier = new Identifier(id.getNamespace(), replace(original.get("id").getAsString(), template));
+            Identifier identifier = new Identifier(id.getNamespace(), replace(original.get("id").getAsString(), replacement));
 
             filledRecipes.add(new Pair<>(identifier, copy));
         }
@@ -79,33 +48,18 @@ public class RecipeTemplateFiller {
     }
 
     public static List<Pair<Identifier, JsonObject>> fillFurnaceTemplate(Identifier id, JsonObject original) {
-        JsonArray templateArray = original.getAsJsonArray("replacements");
-        List<Template> templates = new ArrayList<>();
+        List<List<Pair<String, String>>> replacements = getReplacements(original.getAsJsonArray("replacements"));
         List<Pair<Identifier, JsonObject>> filledRecipes = new ArrayList<>();
 
-        for (JsonElement element: templateArray) {
-            if (element.isJsonObject()) {
-                JsonObject obj = element.getAsJsonObject();
-                List<Pair<String, String>> pairs = new ArrayList<>();
-                for (Map.Entry<String, JsonElement> entry: obj.entrySet()) {
-                    if (entry.getValue().isJsonPrimitive()) {
-                        Pair<String, String> pair = new Pair<>(entry.getKey(), entry.getValue().getAsString());
-                        pairs.add(pair);
-                    }
-                }
-                templates.add(new Template(pairs));
-            }
-        }
-
-        for (Template template: templates) {
+        for (List<Pair<String, String>> replacement: replacements) {
             JsonObject copy = new JsonObject();
             copy.add("type", original.get("type"));
-            copy.add("ingredient", fillSingleIngredient(original.getAsJsonObject("ingredient"), template));
+            copy.add("ingredient", fillSingleIngredient(original.getAsJsonObject("ingredient"), replacement));
             copy.add("experience", original.get("experience"));
             copy.add("cookingtime", original.get("cookingtime"));
-            copy.add("result", new JsonPrimitive(replace(original.get("result").getAsString(), template)));
+            copy.add("result", new JsonPrimitive(replace(original.get("result").getAsString(), replacement)));
 
-            Identifier identifier = new Identifier(id.getNamespace(), replace(original.get("id").getAsString(), template));
+            Identifier identifier = new Identifier(id.getNamespace(), replace(original.get("id").getAsString(), replacement));
 
             filledRecipes.add(new Pair<>(identifier, copy));
         }
@@ -113,33 +67,53 @@ public class RecipeTemplateFiller {
         return filledRecipes;
     }
 
-    private static JsonObject fillKeyTemplate(JsonObject object, Template template) {
+    private static List<List<Pair<String, String>>> getReplacements(JsonArray replacementsArray) {
+        List<List<Pair<String, String>>> replacements = new ArrayList<>();
+
+        for (JsonElement element: replacementsArray) {
+            if (element.isJsonObject()) {
+                JsonObject obj = element.getAsJsonObject();
+                List<Pair<String, String>> replacement = new ArrayList<>();
+                for (Map.Entry<String, JsonElement> entry: obj.entrySet()) {
+                    if (entry.getValue().isJsonPrimitive()) {
+                        Pair<String, String> pair = new Pair<>(entry.getKey(), entry.getValue().getAsString());
+                        replacement.add(pair);
+                    }
+                }
+                replacements.add(replacement);
+            }
+        }
+
+        return replacements;
+    }
+
+    private static JsonObject fillKeyTemplate(JsonObject object, List<Pair<String, String>> replacements) {
         JsonObject key = new JsonObject();
 
         for (Map.Entry<String, JsonElement> entry: object.entrySet()) {
             if (entry.getValue() instanceof JsonObject) {
-                key.add(entry.getKey(), fillSingleIngredient(entry.getValue().getAsJsonObject(), template));
+                key.add(entry.getKey(), fillSingleIngredient(entry.getValue().getAsJsonObject(), replacements));
             }
         }
         return key;
     }
 
-    private static JsonObject fillSingleIngredient(JsonObject original,Template template) {
+    private static JsonObject fillSingleIngredient(JsonObject original, List<Pair<String, String>> replacements) {
         JsonObject ingredientObject = new JsonObject();
         String property = itemOrTag(original);
-        String filledString = replace(original.get(property).getAsString(), template);
+        String filledString = replace(original.get(property).getAsString(), replacements);
         ingredientObject.add(property, new JsonPrimitive(filledString));
         return ingredientObject;
     }
 
-    private static JsonArray fillIngredientsTemplate(JsonArray array, Template template) {
+    private static JsonArray fillIngredientsTemplate(JsonArray array, List<Pair<String, String>> replacements) {
         JsonArray ingredients = new JsonArray();
 
         for (JsonElement element: array) {
             if (element.isJsonObject()) {
                 JsonObject ingredient = new JsonObject();
                 String property = itemOrTag((JsonObject) element);
-                String filledString = replace(((JsonObject) element).get(property).getAsString(), template);
+                String filledString = replace(((JsonObject) element).get(property).getAsString(), replacements);
                 ingredient.add(property, new JsonPrimitive(filledString));
                 ingredients.add(ingredient);
             }
@@ -148,20 +122,20 @@ public class RecipeTemplateFiller {
         return ingredients;
     }
 
-    private static JsonObject fillResultTemplate(JsonObject object, Template template) {
+    private static JsonObject fillResultTemplate(JsonObject object, List<Pair<String, String>> replacements) {
         JsonObject result = new JsonObject();
         result.add("count", object.get("count"));
 
-        String item = replace(object.get("item").getAsString(), template);
+        String item = replace(object.get("item").getAsString(), replacements);
         result.add("item", new JsonPrimitive(item));
 
         return result;
     }
 
-    private static String replace(String string, Template template) {
+    private static String replace(String string, List<Pair<String, String>> replacements) {
         String out = string;
-        for (Pair<String, String> pair: template.fills) {
-            out = out.replace("${" + pair.getLeft() + "}", pair.getRight());
+        for (Pair<String, String> replacement: replacements) {
+            out = out.replace("${" + replacement.getLeft() + "}", replacement.getRight());
         }
         return out;
     }
