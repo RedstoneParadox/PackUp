@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": {
+    "item": "minecraft:polished_${stone}"
+  },
+  "result": "minecraft:${stone}",
+  "count": 1,
+  "id": "${stone}_stonecutter_test",
+  "replacements": [
+    {
+      "stone": "granite"
+    },
+    {
+      "stone": "andesite"
+    },
+    {
+      "stone": "diorite"
+    }
+  ]
+}

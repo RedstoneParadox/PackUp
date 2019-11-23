@@ -80,6 +80,9 @@ public abstract class RecipeManagerMixin {
                 case "minecraft:campfire_cooking":
                 case "minecraft:smoking":
                     filled = RecipeTemplateFiller.fillFurnaceTemplate(identifier_1, jsonObject_1);
+                    break;
+                case "minecraft:stonecutting":
+                    filled = RecipeTemplateFiller.fillStoneCutterTemplate(identifier_1, jsonObject_1);
             }
 
             for (Pair<Identifier, JsonObject> pair : filled) {

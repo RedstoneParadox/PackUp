@@ -67,6 +67,25 @@ public class RecipeTemplateFiller {
         return filledRecipes;
     }
 
+    public static List<Pair<Identifier, JsonObject>> fillStoneCutterTemplate(Identifier id, JsonObject original) {
+        List<List<Pair<String, String>>> replacements = getReplacements(original.getAsJsonArray("replacements"));
+        List<Pair<Identifier, JsonObject>> filledRecipes = new ArrayList<>();
+
+        for (List<Pair<String, String>> replacement: replacements) {
+            JsonObject copy = new JsonObject();
+            copy.add("type", original.get("type"));
+            copy.add("ingredient", fillSingleIngredient(original.getAsJsonObject("ingredient"), replacement));
+            copy.add("result", new JsonPrimitive(replace(original.get("result").getAsString(), replacement)));
+            copy.add("count", original.get("count"));
+
+            Identifier identifier = new Identifier(id.getNamespace(), replace(original.get("id").getAsString(), replacement));
+
+            filledRecipes.add(new Pair<>(identifier, copy));
+        }
+
+        return filledRecipes;
+    }
+
     private static List<List<Pair<String, String>>> getReplacements(JsonArray replacementsArray) {
         List<List<Pair<String, String>>> replacements = new ArrayList<>();
 
