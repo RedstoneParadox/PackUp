@@ -61,7 +61,7 @@ public abstract class RecipeManagerMixin {
 
     @Inject(method = "deserialize", at = @At("HEAD"), cancellable = true)
     private static void interceptRecipeTemplate(Identifier identifier_1, JsonObject jsonObject_1, CallbackInfoReturnable<Recipe<?>> cir) {
-        if (jsonObject_1.has("template") && jsonObject_1.has("id")) {
+        if (jsonObject_1.has("replacements") && jsonObject_1.has("id")) {
             if (jsonObject_1.get("type").getAsString().equals("minecraft:crafting_shaped")) {
                 for (Pair<Identifier, JsonObject> pair: RecipeTemplateFiller.fillShapedTemplate(identifier_1, jsonObject_1)) {
                     try {

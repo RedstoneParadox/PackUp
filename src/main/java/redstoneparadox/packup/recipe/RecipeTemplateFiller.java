@@ -13,7 +13,7 @@ import java.util.Map;
 
 public class RecipeTemplateFiller {
     public static List<Pair<Identifier, JsonObject>> fillShapedTemplate(Identifier id, JsonObject object) {
-        JsonArray templateArray = object.getAsJsonArray("template");
+        JsonArray templateArray = object.getAsJsonArray("replacements");
         List<Template> templates = new ArrayList<>();
         List<Pair<Identifier, JsonObject>> filledRecipes = new ArrayList<>();
 

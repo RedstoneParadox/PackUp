@@ -1,0 +1,34 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "aaa"
+  ],
+  "key": {
+    "a": {
+      "item": "${mod}:${item}"
+    }
+  },
+  "result": {
+    "item": "minecraft:${item}",
+    "count": 3
+  },
+  "id": "test_${item}",
+  "replacements": [
+    {
+      "mod": "minecraft",
+      "item": "clay_ball"
+    },
+    {
+      "mod": "minecraft",
+      "item": "coal"
+    },
+    {
+      "mod": "minecraft",
+      "item": "brick"
+    },
+    {
+      "mod": "minecraft",
+      "item": "diamond"
+    }
+  ]
+}

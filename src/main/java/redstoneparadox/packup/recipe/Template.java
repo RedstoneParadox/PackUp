@@ -4,10 +4,10 @@ import net.minecraft.util.Pair;
 
 import java.util.List;
 
-public class Template {
-    public final List<Pair<String, String>> fills;
+class Template {
+    final List<Pair<String, String>> fills;
 
-    public Template(List<Pair<String, String>> fills) {
+    Template(List<Pair<String, String>> fills) {
         this.fills = fills;
     }
 }

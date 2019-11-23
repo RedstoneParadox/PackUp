@@ -1,7 +1,6 @@
 package redstoneparadox.packup.recipe;
 
 import com.google.gson.JsonObject;
-import com.sun.xml.internal.bind.v2.model.core.ID;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
@@ -19,9 +18,9 @@ import java.util.Optional;
 
 public class DummyRecipe implements Recipe<Inventory> {
 
-    public static final RecipeType<DummyRecipe> TYPE = Registry.register(Registry.RECIPE_TYPE, "packup:dummy", new Type());
-    public static final RecipeSerializer<DummyRecipe> SERIALIZER = RecipeSerializer.register("packup:dummy", new DummyRecipe.Serializer());
     private static final Identifier IDENTIFIER = new Identifier("packup", "dummy");
+    public static final RecipeType<DummyRecipe> TYPE = Registry.register(Registry.RECIPE_TYPE, IDENTIFIER, new Type());
+    public static final RecipeSerializer<DummyRecipe> SERIALIZER = Registry.register(Registry.RECIPE_SERIALIZER, IDENTIFIER, new Serializer());
 
     @Override
     public boolean isIgnoredInRecipeBook() {
