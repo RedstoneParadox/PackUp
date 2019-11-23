@@ -3,6 +3,7 @@
   "package": "redstoneparadox.packup.mixin",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
+    "block.BlockMixin",
     "recipe.RecipeManagerMixin"
   ],
   "client": [
