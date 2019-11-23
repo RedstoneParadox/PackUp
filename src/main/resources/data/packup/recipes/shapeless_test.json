@@ -1,0 +1,69 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "minecraft:${color}_wool"
+    },
+    {
+      "item": "minecraft:${color}_wool"
+    },
+    {
+      "item": "minecraft:${color}_wool"
+    }
+  ],
+  "result": {
+    "item": "minecraft:${color}_wool",
+    "count": 3
+  },
+  "id": "${color}_wool_test",
+  "replacements": [
+    {
+      "color": "white"
+    },
+    {
+      "color": "orange"
+    },
+    {
+      "color": "magenta"
+    },
+    {
+      "color": "light_blue"
+    },
+    {
+      "color": "yellow"
+    },
+    {
+      "color": "lime"
+    },
+    {
+      "color": "pink"
+    },
+    {
+      "color": "gray"
+    },
+    {
+      "color": "light_gray"
+    },
+    {
+      "color": "cyan"
+    },
+    {
+      "color": "purple"
+    },
+    {
+      "color": "blue"
+    },
+    {
+      "color": "brown"
+    },
+    {
+      "color": "green"
+    },
+    {
+      "color": "red"
+    },
+    {
+      "color": "black"
+    }
+  ]
+}

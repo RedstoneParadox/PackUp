@@ -68,7 +68,17 @@ public abstract class RecipeManagerMixin {
                         Recipe<?> recipe = deserialize(pair.getLeft(), pair.getRight());
                         filledTemplates.put(pair.getLeft(), recipe);
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        System.out.println(e);
+                    }
+                }
+            }
+            else if (jsonObject_1.get("type").getAsString().equals("minecraft:crafting_shapeless")) {
+                for (Pair<Identifier, JsonObject> pair: RecipeTemplateFiller.fillShapelessTemplate(identifier_1, jsonObject_1)) {
+                    try {
+                        Recipe<?> recipe = deserialize(pair.getLeft(), pair.getRight());
+                        filledTemplates.put(pair.getLeft(), recipe);
+                    } catch (Exception e) {
+                        System.out.println(e);
                     }
                 }
             }
