@@ -18,7 +18,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import redstoneparadox.packup.recipe.DummyRecipe;
 import redstoneparadox.packup.recipe.RecipeTemplateFiller;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Mixin(RecipeManager.class)
@@ -62,26 +64,33 @@ public abstract class RecipeManagerMixin {
     @Inject(method = "deserialize", at = @At("HEAD"), cancellable = true)
     private static void interceptRecipeTemplate(Identifier identifier_1, JsonObject jsonObject_1, CallbackInfoReturnable<Recipe<?>> cir) {
         if (jsonObject_1.has("replacements") && jsonObject_1.has("id")) {
-            if (jsonObject_1.get("type").getAsString().equals("minecraft:crafting_shaped")) {
-                for (Pair<Identifier, JsonObject> pair: RecipeTemplateFiller.fillShapedTemplate(identifier_1, jsonObject_1)) {
-                    try {
-                        Recipe<?> recipe = deserialize(pair.getLeft(), pair.getRight());
-                        filledTemplates.put(pair.getLeft(), recipe);
-                    } catch (Exception e) {
-                        System.out.println(e);
-                    }
+
+            String type = jsonObject_1.get("type").getAsString();
+            List<Pair<Identifier, JsonObject>> filled = new ArrayList<>();
+
+            switch (type) {
+                case "minecraft:crafting_shaped":
+                    filled = RecipeTemplateFiller.fillShapedTemplate(identifier_1, jsonObject_1);
+                    break;
+                case "minecraft:crafting_shapeless":
+                    filled = RecipeTemplateFiller.fillShapelessTemplate(identifier_1, jsonObject_1);
+                    break;
+                case "minecraft:smelting":
+                case "minecraft:blasting":
+                case "minecraft:campfire_cooking":
+                case "minecraft:smoking":
+                    filled = RecipeTemplateFiller.fillFurnaceTemplate(identifier_1, jsonObject_1);
+            }
+
+            for (Pair<Identifier, JsonObject> pair : filled) {
+                try {
+                    Recipe<?> recipe = deserialize(pair.getLeft(), pair.getRight());
+                    filledTemplates.put(pair.getLeft(), recipe);
+                } catch (Exception e) {
+                    System.out.println(e);
                 }
             }
-            else if (jsonObject_1.get("type").getAsString().equals("minecraft:crafting_shapeless")) {
-                for (Pair<Identifier, JsonObject> pair: RecipeTemplateFiller.fillShapelessTemplate(identifier_1, jsonObject_1)) {
-                    try {
-                        Recipe<?> recipe = deserialize(pair.getLeft(), pair.getRight());
-                        filledTemplates.put(pair.getLeft(), recipe);
-                    } catch (Exception e) {
-                        System.out.println(e);
-                    }
-                }
-            }
+
             cir.setReturnValue(new DummyRecipe());
             cir.cancel();
         }

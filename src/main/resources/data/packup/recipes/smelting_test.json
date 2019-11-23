@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:smelting",
+  "ingredient": {
+    "item": "minecraft:${gem}"
+  },
+  "result": "minecraft:dirt",
+  "experience": 0.1,
+  "cookingtime": 5,
+  "id": "${gem}_smelting_test",
+  "replacements": [
+    {
+      "gem": "diamond"
+    },
+    {
+      "gem": "emerald"
+    },
+    {
+      "gem": "lapis_lazuli"
+    },
+    {
+      "gem": "quartz"
+    }
+  ]
+}
