@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
-  "id": "modid",
-  "version": "${version}",
+  "id": "packup",
+  "version": "0.1.0",
 
-  "name": "Example Mod",
+  "name": "Pack Up",
   "description": "This is an example description! Tell everyone what your mod is about!",
   "authors": [
     "Me!"
@@ -19,17 +19,17 @@
   "environment": "*",
   "entrypoints": {
     "main": [
-      "net.fabricmc.example.ExampleMod"
+      "redstoneparadox.packup.PackUp"
     ]
   },
   "mixins": [
-    "modid.mixins.json"
+    "packup.mixins.json"
   ],
 
   "depends": {
     "fabricloader": ">=0.4.0",
     "fabric": "*",
-    "minecraft": "1.14.x"
+    "minecraft": "1.15.x"
   },
   "suggests": {
     "flamingo": "*"
