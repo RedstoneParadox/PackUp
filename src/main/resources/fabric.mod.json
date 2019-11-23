@@ -4,16 +4,15 @@
   "version": "0.1.0",
 
   "name": "Pack Up",
-  "description": "This is an example description! Tell everyone what your mod is about!",
+  "description": "Pack Up is a utility mod that aims to expand what you can do with Data Packs.",
   "authors": [
-    "Me!"
+    "RedstoneParadox"
   ],
   "contact": {
-    "homepage": "https://fabricmc.net/",
-    "sources": "https://github.com/FabricMC/fabric-example-mod"
+    "sources": "https://github.com/RedstoneParadox/PackUp"
   },
 
-  "license": "CC0-1.0",
+  "license": "MIT",
   "icon": "assets/modid/icon.png",
 
   "environment": "*",
@@ -30,8 +29,5 @@
     "fabricloader": ">=0.4.0",
     "fabric": "*",
     "minecraft": "1.15.x"
-  },
-  "suggests": {
-    "flamingo": "*"
   }
 }
