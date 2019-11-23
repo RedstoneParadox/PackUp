@@ -1,11 +1,15 @@
 {
   "type": "minecraft:crafting_shaped",
   "pattern": [
-    "aaa"
+    "aaa",
+    "bbb"
   ],
   "key": {
     "a": {
       "item": "${mod}:${item}"
+    },
+    "b": {
+      "tag": "${mod}:${tag}"
     }
   },
   "result": {
@@ -16,19 +20,23 @@
   "replacements": [
     {
       "mod": "minecraft",
-      "item": "clay_ball"
+      "item": "clay_ball",
+      "tag": "wool"
     },
     {
       "mod": "minecraft",
-      "item": "coal"
+      "item": "coal",
+      "tag": "wool"
     },
     {
       "mod": "minecraft",
-      "item": "brick"
+      "item": "brick",
+      "tag": "wool"
     },
     {
       "mod": "minecraft",
-      "item": "diamond"
+      "item": "diamond",
+      "tag": "wool"
     }
   ]
 }

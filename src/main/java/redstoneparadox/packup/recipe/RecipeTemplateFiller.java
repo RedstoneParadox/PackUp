@@ -1,9 +1,6 @@
 package redstoneparadox.packup.recipe;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
+import com.google.gson.*;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Pair;
 
@@ -52,8 +49,9 @@ public class RecipeTemplateFiller {
         for (Map.Entry<String, JsonElement> entry: object.entrySet()) {
             if (entry.getValue() instanceof JsonObject) {
                 JsonObject keyObject = new JsonObject();
-                String filledString = replace(((JsonObject) entry.getValue()).get("item").getAsString(), template);
-                keyObject.add("item", new JsonPrimitive(filledString));
+                String property = itemOrTag((JsonObject) entry.getValue());
+                String filledString = replace(((JsonObject) entry.getValue()).get(property).getAsString(), template);
+                keyObject.add(property, new JsonPrimitive(filledString));
                 key.add(entry.getKey(), keyObject);
             }
         }
@@ -76,5 +74,11 @@ public class RecipeTemplateFiller {
             out = out.replace("${" + pair.getLeft() +"}", pair.getRight());
         }
         return out;
+    }
+
+    private static String itemOrTag(JsonObject object) {
+        if (object.has("item")) return "item";
+        if (object.has("tag")) return "tag";
+        throw new JsonSyntaxException("Malformed recipe!");
     }
 }
