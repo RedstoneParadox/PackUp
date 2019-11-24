@@ -2,6 +2,7 @@ package redstoneparadox.packup.mixin.recipe;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.JsonObject;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.recipe.Recipe;
 import net.minecraft.recipe.RecipeManager;
 import net.minecraft.recipe.RecipeType;
@@ -63,6 +64,8 @@ public abstract class RecipeManagerMixin {
 
     @Inject(method = "deserialize", at = @At("HEAD"), cancellable = true)
     private static void interceptRecipeTemplate(Identifier identifier_1, JsonObject jsonObject_1, CallbackInfoReturnable<Recipe<?>> cir) {
+        if (identifier_1.getNamespace().equals("packup") && !FabricLoader.getInstance().isDevelopmentEnvironment()) return;
+
         if (jsonObject_1.has("replacements") && jsonObject_1.has("id")) {
 
             String type = jsonObject_1.get("type").getAsString();
