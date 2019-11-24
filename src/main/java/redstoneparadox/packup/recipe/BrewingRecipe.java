@@ -10,9 +10,7 @@ import net.minecraft.inventory.Inventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.item.PotionItem;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.TagReader;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionUtil;
 import net.minecraft.recipe.Ingredient;
@@ -25,53 +23,57 @@ import net.minecraft.util.PacketByteBuf;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.World;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
-public class PotionRecipe implements Recipe<Inventory> {
+public class BrewingRecipe implements Recipe<Inventory> {
 
     private static Identifier IDENTIFIER = new Identifier("packup", "brewing");
-    private static RecipeType<PotionRecipe> TYPE = Registry.register(Registry.RECIPE_TYPE, IDENTIFIER, new Type());
-    private static RecipeSerializer<PotionRecipe> SERIALIZER = Registry.register(Registry.RECIPE_SERIALIZER, IDENTIFIER, new Serializer());
-
-    public static List<PotionRecipe> RECIPES = new ArrayList<>();
+    public static RecipeType<BrewingRecipe> TYPE = Registry.register(Registry.RECIPE_TYPE, IDENTIFIER, new Type());
+    private static RecipeSerializer<BrewingRecipe> SERIALIZER = Registry.register(Registry.RECIPE_SERIALIZER, IDENTIFIER, new Serializer());
 
     private final CompoundTag data;
 
-    private final Ingredient item;
-    private final Ingredient reagent;
+    private final Ingredient input;
+    private final Ingredient ingredient;
     private final ItemStack result;
 
-    private PotionRecipe(CompoundTag data, Ingredient item, Ingredient reagent, ItemStack result) {
+    private BrewingRecipe(CompoundTag data, Ingredient input, Ingredient ingredient, ItemStack result) {
         this.data = data;
-        this.item = item;
-        this.reagent = reagent;
+        this.input = input;
+        this.ingredient = ingredient;
         this.result = result;
     }
 
     @Override
     public boolean matches(Inventory inv, World world) {
+        ItemStack ingredient = inv.getInvStack(3);
+
+        if (!this.ingredient.test(ingredient)) return false;
+
+        for (int i = 0; i < 3; i++) {
+            ItemStack input = inv.getInvStack(i);
+            if (this.input.test(input)) return true;
+        }
+
         return false;
     }
 
     @Override
     public ItemStack craft(Inventory inv) {
-        return ItemStack.EMPTY;
-    }
-
-    public ItemStack craft() {
+        if (matches(inv, null)) {
+            return result.copy();
+        }
         return ItemStack.EMPTY;
     }
 
     @Override
     public boolean fits(int width, int height) {
-        return false;
+        return true;
     }
 
     @Override
     public ItemStack getOutput() {
-        return ItemStack.EMPTY;
+        return result.copy();
     }
 
     @Override
@@ -94,43 +96,41 @@ public class PotionRecipe implements Recipe<Inventory> {
         return new ItemStack(Items.BREWING_STAND);
     }
 
-    private static class Type implements RecipeType<PotionRecipe> {
+    private static class Type implements RecipeType<BrewingRecipe> {
         @Override
-        public <C extends Inventory> Optional<PotionRecipe> get(Recipe<C> recipe_1, World world_1, C inventory_1) {
+        public <C extends Inventory> Optional<BrewingRecipe> get(Recipe<C> recipe_1, World world_1, C inventory_1) {
             return Optional.empty();
         }
     }
 
-    private static class Serializer implements RecipeSerializer<PotionRecipe> {
+    private static class Serializer implements RecipeSerializer<BrewingRecipe> {
 
         @Override
-        public PotionRecipe read(Identifier id, JsonObject json) {
+        public BrewingRecipe read(Identifier id, JsonObject json) {
             CompoundTag nbt = (CompoundTag) Dynamic.convert(JsonOps.INSTANCE, NbtOps.INSTANCE, json);
 
             Ingredient input = deserializeInput(nbt.getCompound("input"));
-            Ingredient reagent = deserializeReagent(nbt.getCompound("reagent"));
-            ItemStack result = deserializeResult(nbt.getCompound("result"));
+            Ingredient ingredient = deserializeIngredient(nbt.getCompound("ingredient"));
+            ItemStack output = deserializeOutput(nbt.getCompound("output"));
 
-            PotionRecipe recipe = new PotionRecipe(nbt, input, reagent, result);
-            RECIPES.add(recipe);
+            BrewingRecipe recipe = new BrewingRecipe(nbt, input, ingredient, output);
             return recipe;
         }
 
         @Override
-        public PotionRecipe read(Identifier id, PacketByteBuf buf) {
+        public BrewingRecipe read(Identifier id, PacketByteBuf buf) {
             CompoundTag nbt = buf.readCompoundTag();
 
             Ingredient input = deserializeInput(nbt.getCompound("input"));
-            Ingredient reagent = deserializeReagent(nbt.getCompound("reagent"));
-            ItemStack result = deserializeResult(nbt.getCompound("result"));
+            Ingredient ingredient = deserializeIngredient(nbt.getCompound("ingredient"));
+            ItemStack output = deserializeOutput(nbt.getCompound("output"));
 
-            PotionRecipe recipe = new PotionRecipe(nbt, input, reagent, result);
-            RECIPES.add(recipe);
+            BrewingRecipe recipe = new BrewingRecipe(nbt, input, ingredient, output);
             return recipe;
         }
 
         @Override
-        public void write(PacketByteBuf buf, PotionRecipe recipe) {
+        public void write(PacketByteBuf buf, BrewingRecipe recipe) {
             buf.writeCompoundTag(recipe.data);
         }
 
@@ -163,7 +163,7 @@ public class PotionRecipe implements Recipe<Inventory> {
             throw new JsonSyntaxException("");
         }
 
-        private Ingredient deserializeReagent(CompoundTag tag) {
+        private Ingredient deserializeIngredient(CompoundTag tag) {
             if (tag.contains("item")) {
                 String id = tag.getString("item");
                 Item item = Registry.ITEM.get(new Identifier(id));
@@ -177,7 +177,7 @@ public class PotionRecipe implements Recipe<Inventory> {
             throw new JsonSyntaxException("");
         }
 
-        private ItemStack deserializeResult(CompoundTag tag) {
+        private ItemStack deserializeOutput(CompoundTag tag) {
             if (tag.contains("item")) {
                 String id = tag.getString("item");
                 Item item = Registry.ITEM.get(new Identifier(id));
