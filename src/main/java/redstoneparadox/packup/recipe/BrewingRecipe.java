@@ -22,6 +22,7 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.PacketByteBuf;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.World;
+import redstoneparadox.packup.util.FixedJsonOps;
 
 public class BrewingRecipe implements Recipe<Inventory> {
 
@@ -56,6 +57,10 @@ public class BrewingRecipe implements Recipe<Inventory> {
     }
 
     public boolean matches(Inventory inv, int slot) {
+        ItemStack ingredient = inv.getInvStack(3);
+
+        if (!this.ingredient.test(ingredient)) return false;
+
         ItemStack input = inv.getInvStack(slot);
         return this.input.test(input);
     }
@@ -103,7 +108,7 @@ public class BrewingRecipe implements Recipe<Inventory> {
 
         @Override
         public BrewingRecipe read(Identifier id, JsonObject json) {
-            CompoundTag nbt = (CompoundTag) Dynamic.convert(JsonOps.INSTANCE, NbtOps.INSTANCE, json);
+            CompoundTag nbt = (CompoundTag) Dynamic.convert(FixedJsonOps.INSTANCE, NbtOps.INSTANCE, json);
 
             BrewingIngredient input = deserializeInput(nbt.getCompound("input"));
             Ingredient ingredient = deserializeIngredient(nbt.getCompound("ingredient"));
@@ -166,7 +171,13 @@ public class BrewingRecipe implements Recipe<Inventory> {
             if (tag.contains("item")) {
                 String id = tag.getString("item");
                 Item item = Registry.ITEM.get(new Identifier(id));
-                return BrewingResult.ofItemStack(new ItemStack(item));
+                ItemStack stack = new ItemStack(item);
+
+                if (tag.contains("apply")) {
+                    return BrewingResult.ofItemStack(stack, tag.getBoolean("apply"));
+                }
+
+                return BrewingResult.ofItemStack(stack, false);
             }
             else if (tag.contains("potion")) {
                 String id = tag.getString("potion");
@@ -178,7 +189,7 @@ public class BrewingRecipe implements Recipe<Inventory> {
 
                 ItemStack stack = new ItemStack(Items.POTION);
 
-                return BrewingResult.ofItemStack(PotionUtil.setPotion(stack, potion));
+                return BrewingResult.ofItemStack(PotionUtil.setPotion(stack, potion), false);
             }
             throw new JsonSyntaxException("");
         }

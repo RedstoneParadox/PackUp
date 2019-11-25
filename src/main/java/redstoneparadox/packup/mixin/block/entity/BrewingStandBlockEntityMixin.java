@@ -56,6 +56,7 @@ public abstract class BrewingStandBlockEntityMixin extends LockableContainerBloc
                 if (recipe.matches(this, i)) {
                     setInvStack(i, recipe.craft(getInvStack(i)));
                     success = true;
+                    break;
                 }
             }
         }

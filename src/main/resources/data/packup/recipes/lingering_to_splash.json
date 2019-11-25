@@ -1,0 +1,13 @@
+{
+  "type": "packup:brewing",
+  "input": {
+    "item": "minecraft:lingering_potion"
+  },
+  "ingredient": {
+    "item": "minecraft:gold_ingot"
+  },
+  "output": {
+    "item": "minecraft:splash_potion",
+    "apply": true
+  }
+}

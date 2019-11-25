@@ -1,0 +1,13 @@
+{
+  "type": "packup:brewing",
+  "input": {
+    "potion": "minecraft:regeneration"
+  },
+  "ingredient": {
+    "item": "minecraft:bedrock"
+  },
+  "output": {
+    "item": "minecraft:cooked_beef",
+    "apply": true
+  }
+}
