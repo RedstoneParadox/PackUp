@@ -1,0 +1,12 @@
+{
+  "type": "packup:brewing",
+  "input": {
+    "item": "minecraft:diamond"
+  },
+  "ingredient": {
+    "tag": "minecraft:wool"
+  },
+  "output": {
+    "item": "minecraft:dirt"
+  }
+}

@@ -4,6 +4,7 @@
   "compatibilityLevel": "JAVA_8",
   "mixins": [
     "block.BlockMixin",
+    "block.entity.BrewingStandBlockEntityMixin",
     "recipe.RecipeManagerMixin"
   ],
   "client": [

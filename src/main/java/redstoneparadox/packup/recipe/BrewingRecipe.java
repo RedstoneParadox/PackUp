@@ -27,9 +27,9 @@ import java.util.Optional;
 
 public class BrewingRecipe implements Recipe<Inventory> {
 
-    private static Identifier IDENTIFIER = new Identifier("packup", "brewing");
-    public static RecipeType<BrewingRecipe> TYPE = Registry.register(Registry.RECIPE_TYPE, IDENTIFIER, new Type());
-    private static RecipeSerializer<BrewingRecipe> SERIALIZER = Registry.register(Registry.RECIPE_SERIALIZER, IDENTIFIER, new Serializer());
+    private static final Identifier IDENTIFIER = new Identifier("packup", "brewing");
+    public static final RecipeType<BrewingRecipe> TYPE = RecipeType.register(IDENTIFIER.toString());
+    public static final RecipeSerializer<BrewingRecipe> SERIALIZER = Registry.register(Registry.RECIPE_SERIALIZER, IDENTIFIER, new Serializer());
 
     private final CompoundTag data;
 
@@ -51,19 +51,20 @@ public class BrewingRecipe implements Recipe<Inventory> {
         if (!this.ingredient.test(ingredient)) return false;
 
         for (int i = 0; i < 3; i++) {
-            ItemStack input = inv.getInvStack(i);
-            if (this.input.test(input)) return true;
+            if (matches(inv, i)) return true;
         }
 
         return false;
     }
 
+    public boolean matches(Inventory inv, int slot) {
+        ItemStack input = inv.getInvStack(slot);
+        return this.input.test(input);
+    }
+
     @Override
     public ItemStack craft(Inventory inv) {
-        if (matches(inv, null)) {
-            return result.copy();
-        }
-        return ItemStack.EMPTY;
+        return result.copy();
     }
 
     @Override
@@ -94,13 +95,6 @@ public class BrewingRecipe implements Recipe<Inventory> {
     @Override
     public ItemStack getRecipeKindIcon() {
         return new ItemStack(Items.BREWING_STAND);
-    }
-
-    private static class Type implements RecipeType<BrewingRecipe> {
-        @Override
-        public <C extends Inventory> Optional<BrewingRecipe> get(Recipe<C> recipe_1, World world_1, C inventory_1) {
-            return Optional.empty();
-        }
     }
 
     private static class Serializer implements RecipeSerializer<BrewingRecipe> {
