@@ -5,6 +5,7 @@
   "mixins": [
     "block.BlockMixin",
     "block.entity.BrewingStandBlockEntityMixin",
+    "container.BrewingStandContainerMixin",
     "recipe.RecipeManagerMixin"
   ],
   "client": [
