@@ -1,0 +1,12 @@
+{
+  "type": "packup:brewing",
+  "input": {
+    "potion": "minecraft:thick"
+  },
+  "ingredient": {
+    "item": "minecraft:golden_apple"
+  },
+  "output": {
+    "potion": "minecraft:regeneration"
+  }
+}

@@ -25,13 +25,18 @@ public abstract class BrewingStandBlockEntityMixin extends LockableContainerBloc
 
     @Shadow public abstract ItemStack getInvStack(int slot);
 
+    @Shadow public abstract ItemStack takeInvStack(int slot, int amount);
+
+    @Shadow public abstract void setInvStack(int slot, ItemStack stack);
+
     protected BrewingStandBlockEntityMixin(BlockEntityType<?> blockEntityType) {
         super(blockEntityType);
     }
 
     @Inject(method = "canCraft", at = @At("HEAD"), cancellable = true)
     private void canCraft(CallbackInfoReturnable<Boolean> cir) {
-       List<BrewingRecipe> recipes = world.getRecipeManager().getAllMatches(BrewingRecipe.TYPE, this, world);
+        assert world != null;
+        List<BrewingRecipe> recipes = world.getRecipeManager().getAllMatches(BrewingRecipe.TYPE, this, world);
 
        if (!recipes.isEmpty()) {
            cir.setReturnValue(true);
@@ -41,14 +46,22 @@ public abstract class BrewingStandBlockEntityMixin extends LockableContainerBloc
 
     @Inject(method = "craft", at = @At("HEAD"), cancellable = true)
     private void craft(CallbackInfo ci) {
+        assert world != null;
         List<BrewingRecipe> recipes = world.getRecipeManager().getAllMatches(BrewingRecipe.TYPE, this, world);
+        boolean success = false;
+
 
         for (int i = 0; i < 3; i++) {
             for (BrewingRecipe recipe: recipes) {
                 if (recipe.matches(this, i)) {
-                    inventory.set(i, recipe.craft(this));
+                    setInvStack(i, recipe.craft(getInvStack(i)));
+                    success = true;
                 }
             }
+        }
+        if (success) {
+            takeInvStack(3, 1);
+            ci.cancel();
         }
     }
 

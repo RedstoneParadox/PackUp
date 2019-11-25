@@ -23,8 +23,6 @@ import net.minecraft.util.PacketByteBuf;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.World;
 
-import java.util.Optional;
-
 public class BrewingRecipe implements Recipe<Inventory> {
 
     private static final Identifier IDENTIFIER = new Identifier("packup", "brewing");
@@ -33,11 +31,11 @@ public class BrewingRecipe implements Recipe<Inventory> {
 
     private final CompoundTag data;
 
-    private final Ingredient input;
+    private final BrewingIngredient input;
     private final Ingredient ingredient;
-    private final ItemStack result;
+    private final BrewingResult result;
 
-    private BrewingRecipe(CompoundTag data, Ingredient input, Ingredient ingredient, ItemStack result) {
+    private BrewingRecipe(CompoundTag data, BrewingIngredient input, Ingredient ingredient, BrewingResult result) {
         this.data = data;
         this.input = input;
         this.ingredient = ingredient;
@@ -64,7 +62,11 @@ public class BrewingRecipe implements Recipe<Inventory> {
 
     @Override
     public ItemStack craft(Inventory inv) {
-        return result.copy();
+        return ItemStack.EMPTY;
+    }
+
+    public ItemStack craft(ItemStack input) {
+        return result.toResult(input);
     }
 
     @Override
@@ -74,7 +76,7 @@ public class BrewingRecipe implements Recipe<Inventory> {
 
     @Override
     public ItemStack getOutput() {
-        return result.copy();
+        return ItemStack.EMPTY;
     }
 
     @Override
@@ -103,24 +105,23 @@ public class BrewingRecipe implements Recipe<Inventory> {
         public BrewingRecipe read(Identifier id, JsonObject json) {
             CompoundTag nbt = (CompoundTag) Dynamic.convert(JsonOps.INSTANCE, NbtOps.INSTANCE, json);
 
-            Ingredient input = deserializeInput(nbt.getCompound("input"));
+            BrewingIngredient input = deserializeInput(nbt.getCompound("input"));
             Ingredient ingredient = deserializeIngredient(nbt.getCompound("ingredient"));
-            ItemStack output = deserializeOutput(nbt.getCompound("output"));
+            BrewingResult output = deserializeOutput(nbt.getCompound("output"), input.isPotion());
 
-            BrewingRecipe recipe = new BrewingRecipe(nbt, input, ingredient, output);
-            return recipe;
+            return new BrewingRecipe(nbt, input, ingredient, output);
         }
 
         @Override
         public BrewingRecipe read(Identifier id, PacketByteBuf buf) {
             CompoundTag nbt = buf.readCompoundTag();
 
-            Ingredient input = deserializeInput(nbt.getCompound("input"));
+            assert nbt != null;
+            BrewingIngredient input = deserializeInput(nbt.getCompound("input"));
             Ingredient ingredient = deserializeIngredient(nbt.getCompound("ingredient"));
-            ItemStack output = deserializeOutput(nbt.getCompound("output"));
+            BrewingResult output = deserializeOutput(nbt.getCompound("output"), input.isPotion());
 
-            BrewingRecipe recipe = new BrewingRecipe(nbt, input, ingredient, output);
-            return recipe;
+            return new BrewingRecipe(nbt, input, ingredient, output);
         }
 
         @Override
@@ -128,31 +129,21 @@ public class BrewingRecipe implements Recipe<Inventory> {
             buf.writeCompoundTag(recipe.data);
         }
 
-        private Ingredient deserializeInput(CompoundTag tag) {
+        private BrewingIngredient deserializeInput(CompoundTag tag) {
             if (tag.contains("item")) {
                 String id = tag.getString("item");
                 Item item = Registry.ITEM.get(new Identifier(id));
-                return Ingredient.ofItems(item);
+                return BrewingIngredient.ofIngredient(Ingredient.ofItems(item));
             }
             else if (tag.contains("tag")) {
                 String id = tag.getString("tag");
                 Tag<Item> itemTag = TagRegistry.item(new Identifier(id));
-                return Ingredient.fromTag(itemTag);
+                return BrewingIngredient.ofIngredient(Ingredient.fromTag(itemTag));
             }
             else if (tag.contains("potion")) {
                 String id = tag.getString("potion");
                 Potion potion = Registry.POTION.get(new Identifier(id));
-
-
-                ItemStack stack = new ItemStack(Items.POTION);
-                if (tag.contains("type")) {
-                    if (tag.getString("type").equals("splash")) stack = new ItemStack(Items.SPLASH_POTION);
-                    else if (tag.getString("type").equals("lingering")) stack = new ItemStack(Items.LINGERING_POTION);
-                }
-
-                PotionUtil.setPotion(stack, potion);
-
-                return Ingredient.ofStacks(stack);
+                return BrewingIngredient.ofPotion(potion);
             }
             throw new JsonSyntaxException("");
         }
@@ -171,26 +162,23 @@ public class BrewingRecipe implements Recipe<Inventory> {
             throw new JsonSyntaxException("");
         }
 
-        private ItemStack deserializeOutput(CompoundTag tag) {
+        private BrewingResult deserializeOutput(CompoundTag tag, boolean potionInput) {
             if (tag.contains("item")) {
                 String id = tag.getString("item");
                 Item item = Registry.ITEM.get(new Identifier(id));
-                return new ItemStack(item);
+                return BrewingResult.ofItemStack(new ItemStack(item));
             }
             else if (tag.contains("potion")) {
                 String id = tag.getString("potion");
                 Potion potion = Registry.POTION.get(new Identifier(id));
 
-
-                ItemStack stack = new ItemStack(Items.POTION);
-                if (tag.contains("type")) {
-                    if (tag.getString("type").equals("splash")) stack = new ItemStack(Items.SPLASH_POTION);
-                    else if (tag.getString("type").equals("lingering")) stack = new ItemStack(Items.LINGERING_POTION);
+                if (potionInput) {
+                    return BrewingResult.ofPotion(potion);
                 }
 
-                PotionUtil.setPotion(stack, potion);
+                ItemStack stack = new ItemStack(Items.POTION);
 
-                return stack;
+                return BrewingResult.ofItemStack(PotionUtil.setPotion(stack, potion));
             }
             throw new JsonSyntaxException("");
         }
