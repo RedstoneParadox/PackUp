@@ -3,7 +3,6 @@ package redstoneparadox.packup.recipe;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 import com.mojang.datafixers.Dynamic;
-import com.mojang.datafixers.types.JsonOps;
 import net.fabricmc.fabric.api.tag.TagRegistry;
 import net.minecraft.datafixers.NbtOps;
 import net.minecraft.inventory.Inventory;
@@ -22,7 +21,12 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.PacketByteBuf;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.World;
+import redstoneparadox.packup.recipe.function.RecipeFunction;
+import redstoneparadox.packup.recipe.function.RecipeFunctionParser;
 import redstoneparadox.packup.util.FixedJsonOps;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class BrewingRecipe implements Recipe<Inventory> {
 
@@ -36,11 +40,14 @@ public class BrewingRecipe implements Recipe<Inventory> {
     private final Ingredient ingredient;
     private final BrewingResult result;
 
-    private BrewingRecipe(CompoundTag data, BrewingIngredient input, Ingredient ingredient, BrewingResult result) {
+    private final List<RecipeFunction.ConfiguredRecipeFunction<?>> functions;
+
+    private BrewingRecipe(CompoundTag data, BrewingIngredient input, Ingredient ingredient, BrewingResult result, List<RecipeFunction.ConfiguredRecipeFunction<?>> functions) {
         this.data = data;
         this.input = input;
         this.ingredient = ingredient;
         this.result = result;
+        this.functions = functions;
     }
 
     @Override
@@ -71,7 +78,13 @@ public class BrewingRecipe implements Recipe<Inventory> {
     }
 
     public ItemStack craft(ItemStack input) {
-        return result.toResult(input);
+        ItemStack output = this.result.toResult(input);
+
+        for (RecipeFunction.ConfiguredRecipeFunction<?> function: functions) {
+            output = function.apply(input, output);
+        }
+
+        return output;
     }
 
     @Override
@@ -114,7 +127,12 @@ public class BrewingRecipe implements Recipe<Inventory> {
             Ingredient ingredient = deserializeIngredient(nbt.getCompound("ingredient"));
             BrewingResult output = deserializeOutput(nbt.getCompound("output"), input.isPotion());
 
-            return new BrewingRecipe(nbt, input, ingredient, output);
+            List<RecipeFunction.ConfiguredRecipeFunction<?>> functions = new ArrayList<>();
+            if (json.has("functions") && json.get("functions").isJsonArray()) {
+                RecipeFunctionParser.parse(json.getAsJsonArray("functions"), functions);
+            }
+
+            return new BrewingRecipe(nbt, input, ingredient, output, functions);
         }
 
         @Override
@@ -126,7 +144,13 @@ public class BrewingRecipe implements Recipe<Inventory> {
             Ingredient ingredient = deserializeIngredient(nbt.getCompound("ingredient"));
             BrewingResult output = deserializeOutput(nbt.getCompound("output"), input.isPotion());
 
-            return new BrewingRecipe(nbt, input, ingredient, output);
+            JsonObject json = (JsonObject) Dynamic.convert(NbtOps.INSTANCE, FixedJsonOps.INSTANCE, nbt);
+            List<RecipeFunction.ConfiguredRecipeFunction<?>> functions = new ArrayList<>();
+            if (json.has("functions") && json.get("functions").isJsonArray()) {
+                RecipeFunctionParser.parse(json.getAsJsonArray("functions"), functions);
+            }
+
+            return new BrewingRecipe(nbt, input, ingredient, output, functions);
         }
 
         @Override

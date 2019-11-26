@@ -7,7 +7,14 @@
     "item": "minecraft:gold_ingot"
   },
   "output": {
-    "item": "minecraft:splash_potion",
-    "apply": true
-  }
+    "item": "minecraft:splash_potion"
+  },
+  "functions": [
+    {
+      "id": "packup:copy_nbt",
+      "data": {
+        "tag": "Potion"
+      }
+    }
+  ]
 }

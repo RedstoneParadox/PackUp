@@ -12,16 +12,12 @@ import java.util.List;
 
 public class RecipeFunctionParser {
 
-    public static List<RecipeFunction.ConfiguredRecipeFunction<?>> parse(JsonArray array) {
-        List<RecipeFunction.ConfiguredRecipeFunction<?>> functions = new ArrayList<>();
-
+    public static void parse(JsonArray array, List<RecipeFunction.ConfiguredRecipeFunction<?>> functions) {
         for (JsonElement element: array) {
             if (element instanceof JsonObject) {
                 functions.add(parseFunction(element.getAsJsonObject()));
             }
         }
-
-        return functions;
     }
 
     private static RecipeFunction.ConfiguredRecipeFunction<?> parseFunction(JsonObject object) {

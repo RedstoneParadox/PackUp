@@ -10,16 +10,13 @@ import java.util.Map;
 public abstract class RecipeFunction<D> {
 
     private static final Map<Identifier, RecipeFunction<?>> REGISTRY = new HashMap<>();
+    private static boolean initialized = false;
 
-    public ItemStack apply(ItemStack input, ItemStack output, D data) {
-        return output;
-    }
+    abstract ItemStack apply(ItemStack input, ItemStack output, D data);
 
-    public ItemStack apply(ItemStack[] input, ItemStack output, D data) {
-        return output;
-    }
+    abstract ItemStack apply(ItemStack[] input, ItemStack output, D data);
 
-    abstract ConfiguredRecipeFunction<D> configure(JsonObject input);
+    abstract ConfiguredRecipeFunction<D> configure(JsonObject json);
 
     public static void register(Identifier identifier, RecipeFunction function) {
         REGISTRY.put(identifier, function);
@@ -45,5 +42,11 @@ public abstract class RecipeFunction<D> {
         public ItemStack apply(ItemStack[] input, ItemStack output) {
             return function.apply(input, output, data);
         }
+    }
+
+    public static void init() {
+        if (initialized) return;
+        register(CopyNBTFunction.IDENTIFIER, new CopyNBTFunction());
+        initialized = true;
     }
 }
