@@ -19,13 +19,13 @@ public abstract class RecipeFunction<D> {
         return output;
     }
 
-    public abstract ConfiguredRecipeFunction<D> configure(JsonObject input);
+    abstract ConfiguredRecipeFunction<D> configure(JsonObject input);
 
     public static void register(Identifier identifier, RecipeFunction function) {
         REGISTRY.put(identifier, function);
     }
 
-    public static RecipeFunction<?> get(Identifier identifier) {
+    static RecipeFunction<?> get(Identifier identifier) {
         return REGISTRY.get(identifier);
     }
 
@@ -36,6 +36,14 @@ public abstract class RecipeFunction<D> {
         public ConfiguredRecipeFunction(RecipeFunction<D> function, D data) {
             this.function = function;
             this.data = data;
+        }
+
+        public ItemStack apply(ItemStack input, ItemStack output) {
+            return function.apply(input, output, data);
+        }
+
+        public ItemStack apply(ItemStack[] input, ItemStack output) {
+            return function.apply(input, output, data);
         }
     }
 }
